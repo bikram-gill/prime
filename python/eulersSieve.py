@@ -1,17 +1,20 @@
 '''
-Find prime numbers using Sieve Of Eratosthenes.
-More details: https://en.wikipedia.org/wiki/Sieve_of_Eratosthenes
+Find prime numbers using Eulers's Sieve.
+More details: https://en.wikipedia.org/wiki/Sieve_of_Eratosthenes#Euler's_sieve
+
+NOTE: This approach reduces assignments in Eratoshenes's method, but is slow due to 2 loops
+Need to check possible improvements
 '''
 
 from datetime import datetime
 
 import os
 
-def sieveOfEratosthenesBoolArray( N, 
-                                outputFileName, 
-                                withSequenceNumber,
-                                delimiter=' '):
-    
+def eulersSieveBoolArray(   N, 
+                            outputFileName, 
+                            withSequenceNumber,
+                            delimiter=' '):
+
     #initialize prime number array, number corresponding to index is a prime if value is True (except first 2)
     primeArray = [True for _ in range(N+1)] 
     
@@ -33,10 +36,22 @@ def sieveOfEratosthenesBoolArray( N,
             else:
                 outputFile.writelines(str(number)+'\n')
 
-            for counter in range(number * 2, N+1, number):
-                #Number corresponding to this index is not prime
-                if primeArray[counter]:
+            if number == 2:
+                for counter in range(number, N+1, number):
+                    #Number corresponding to this index is not prime
                     primeArray[counter] = False
+                    
+            if number > 2:
+               
+                buffer = []
+                
+                for counter in range(number, N+1):
+                    if primeArray[counter] or counter in buffer:
+
+                        newNumber = counter * number
+                        if newNumber < N+1 and primeArray[newNumber]:
+                            primeArray[newNumber] = False
+                            buffer.append(newNumber)
 
         number += 1
 
@@ -47,7 +62,7 @@ def sieveOfEratosthenesBoolArray( N,
 
     return primeCount
 
-def sieveOfEratosthenesBitArray(N):
+def eulersSieveBitArray(N):
     pass
 
 if __name__ == '__main__':
@@ -58,7 +73,7 @@ if __name__ == '__main__':
     
     start = datetime.now()
 
-    print('Number of prime numbers written: ', str(sieveOfEratosthenesBoolArray(  N, './temp/primes1.txt', 
+    print('Number of prime numbers written: ', str(eulersSieveBoolArray(  N, './temp/primes2.txt', 
                                                                                 True, ' ') ) )
 
     end = datetime.now()
