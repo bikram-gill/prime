@@ -46,12 +46,19 @@ def eulersSieveBoolArray(   N,
                 buffer = []
                 
                 for counter in range(number, N+1):
-                    if primeArray[counter] or counter in buffer:
+                    if primeArray[counter] or (buffer and counter == buffer[0]):
+
+                        if not primeArray[counter]:
+                            buffer.pop(0)
+                            #print(len(buffer))
 
                         newNumber = counter * number
+
                         if newNumber < N+1 and primeArray[newNumber]:
                             primeArray[newNumber] = False
-                            buffer.append(newNumber)
+                            if (newNumber * number) < N+1:
+                                buffer.append(newNumber)
+                                #print(len(buffer))
 
         number += 1
 
