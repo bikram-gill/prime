@@ -42,7 +42,9 @@ def eulersSieveBoolArray(   N,
                     primeArray[counter] = False
                     
             if number > 2:
-               
+                
+                #While setting a non-prime number index to False, we also need to set its 
+                #next multiple to False. To process the next multiple we save the value in buffer.
                 buffer = []
                 
                 for counter in range(number, N+1):
