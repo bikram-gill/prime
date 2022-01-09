@@ -9,6 +9,7 @@ from datetime import datetime
 from bitarray import bitarray
 
 import os
+import sys
 
 def sieveOfEratosthenesBoolArray( N, 
                                 outputFileName, 
@@ -18,6 +19,8 @@ def sieveOfEratosthenesBoolArray( N,
     #initialize prime number array, number corresponding to index is a prime if value is True (except first 2)
     primeArray = [True for _ in range(N+1)] 
     
+    print('Size of bool array: ' + str(sys.getsizeof(primeArray)))
+
     number = 2 #start with first prime
     
     primeCount = 0
@@ -58,6 +61,8 @@ def sieveOfEratosthenesBitArray(    N,
     #initialize prime number array, number corresponding to index is a prime if value is 1 (except first 2)
     primeArray = bitarray(N+1)
     primeArray.setall(1)
+
+    print('Size of bit array: ' + str(sys.getsizeof(primeArray)))
 
     number = 2 #start with first prime
     
@@ -100,7 +105,8 @@ if __name__ == '__main__':
     
     
     #NOTE: Using bitarray or boolean array does not seem to cause performance difference, as both take around
-    #4 minutes to calculate 5M+ primes within first 100M numbers
+    #4 minutes to calculate 5M+ primes within first 100M numbers. But there is considerable difference in 
+    #memory used.
     start = datetime.now()
     print('Number of prime numbers written: ', str(sieveOfEratosthenesBoolArray(  N, './temp/bitprimes1.txt', 
                                                                                   True, ', ') ) )
