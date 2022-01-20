@@ -11,56 +11,6 @@ from bitarray import bitarray
 import os
 import sys
 
-def sieveOfEratosthenesBoolArray( N,
-                                Count,
-                                outputFileName, 
-                                withSequenceNumber,
-                                delimiter):
-    
-    if N == 0:
-        N = 100000000 #Random upper limit to allow calculation of around 5M primes
-    
-    #initialize prime number array, number corresponding to index is a prime if value is True (except first 2)
-    primeArray = [True for _ in range(N+1)]
-
-    print('Size of bool array: ' + str(sys.getsizeof(primeArray)))
-
-    number = 2 #start with first prime
-    
-    primeCount = 0
-
-    outputFile = open(outputFileName, 'w')
-
-    while True:    
-        #If current number is a prime, mark its multiples out of the primeArray
-        if primeArray[number]:
-            
-            primeCount += 1
-            
-            #Write into a file
-            if withSequenceNumber:
-                outputFile.writelines(str(primeCount) + delimiter + str(number) + '\n')
-            else:
-                outputFile.writelines(str(number)+'\n')
-
-            #If this is count based calculation, break when needed primes are calculated
-            if Count != 0 and Count <= primeCount:
-                break
-
-            for counter in range(number * 2, N+1, number):
-                #Number corresponding to this index is not prime
-                if primeArray[counter]:
-                    primeArray[counter] = False
-
-        number += 1
-
-        if number >= N:
-            break
-    
-    outputFile.close()
-
-    return primeCount
-
 def sieveOfEratosthenesBitArray(    N, 
                                     Count,
                                     outputFileName, 
@@ -68,7 +18,11 @@ def sieveOfEratosthenesBitArray(    N,
                                     delimiter):
 
     if N == 0:
-        N = 100000000 #Random upper limit to allow calculation of around 5M primes
+        if Count < 5000000:
+            N = 100000000 #Random upper limit to allow calculation of around 5M primes
+        else:
+            #Random index limit is around 2100000000 on 64-bit system, which can take hours to run
+            N = 500000000 #Random upper limit to allow calculation of around 26M+ primes, takes 15 min
 
     #initialize prime number array, number corresponding to index is a prime if value is 1 (except first 2)
     primeArray = bitarray(N+1)
@@ -134,19 +88,8 @@ if __name__ == '__main__':
     else:
         withSequenceNumber = False
     
-    #NOTE: Using bitarray or boolean array does not seem to cause performance difference for calculating large number
-    # of primes, as both take around 4 minutes to calculate 5M+ primes within first 100M numbers. But there is 
-    # considerable difference in memory used.
     start = datetime.now()
-    print('Number of prime numbers written: ', str(sieveOfEratosthenesBoolArray(  Num, Count, './temp/bitprimes1.txt', 
-                                                                                  withSequenceNumber, ', ') ) )
-    end = datetime.now()
-    print( 'Start and end time bool array: ', start.strftime("%H:%M:%S"), ' ', end.strftime("%H:%M:%S") )
-    print( 'Time taken (s): ', round( (end - start).total_seconds() , 2) )
-    print( 'Time taken (m): ', round( (end - start).total_seconds() / 60 , 2) )
-
-    start = datetime.now()
-    print('Number of prime numbers written: ', str(sieveOfEratosthenesBitArray(  Num, Count, './temp/boolprimes1.txt', 
+    print('Number of prime numbers written: ', str(sieveOfEratosthenesBitArray(  Num, Count, './temp/primes1.txt', 
                                                                                   withSequenceNumber, ', ') ) )
     end = datetime.now()
     print( 'Start and end time bit array: ', start.strftime("%H:%M:%S"), ' ', end.strftime("%H:%M:%S") )
