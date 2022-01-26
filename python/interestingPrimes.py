@@ -77,7 +77,7 @@ def digitsInRSequenecePrimes(   N,
 '''
 Find prime numbers with single repeating digit, e.g. 11
 
-Actually, till first 26M primes, 11 is the only such number.
+Actually, till first 26M primes, 11 is the only such number, refer primesWithSingleRepeatingDigit2.
 '''
 def primesWithSingleRepeatingDigit( N,
                                     Count,
@@ -108,31 +108,32 @@ def primesWithSingleRepeatingDigit2( N,
     #Repeating digit 7 is always be divisible by 7
     #So we only have digit 1 to test
     
-    number = '1'
-    digit = '1'
-
     #Random number, 300, approx upper limit based on testing on a normal 64 bit system
-    #But limit 50 can also take a lot of time to execute
-    for _ in range(1,50):
-        number += digit
-        isPrime = True
-        length = len(number)
-        
-        #Ignore numbers divisible by 3 (divisibility rule) 
-        if length % 3 == 0:
-            continue
+    #But limit 100 can also take a lot of time to execute
+    MAX = 100
+    numbers = [int('1' * n) for n in range(2, MAX+1)]
 
-        int1 = int(number)
+    # #Remove numbers divisible by 3 (divisibility rule) 
+    # for number in numbers:
+    #     if len(str(number)) % 3 == 0:
+    #         numbers.remove(number)
+      
+    #Check divisibility by odd numbers, and keep removing elements from numbers list if it is not prime
+    for divisor in range(3, int(int('1'*MAX) / 2) + 1, 2):
+    
+        for number in numbers:
+            if number % divisor == 0:
+                numbers.remove(number)
+                print('number removed ', number, ' and divisor ', divisor)
 
-        #Check divisibility by odd numbers
-        for divisor in range(3, int(int1 / 2) + 1, 2):
-            if int1 % divisor == 0:
-                isPrime = False
-                break
-        
-        if isPrime:
-            primes.append(number)
-            print('Prime: ' + str(number))
+            #if divisor is already greater than a number, then it is a prime
+            elif divisor > number / 2:
+                primes.append(number)
+                print('Prime: ' + str(number))
+                numbers.remove(number)
+
+        if len(numbers) < 1:
+            break       
 
     return primes
     
