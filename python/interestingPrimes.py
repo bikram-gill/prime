@@ -109,15 +109,10 @@ def primesWithSingleRepeatingDigit2( N,
     #So we only have digit 1 to test
     
     #Random number, 300, approx upper limit based on testing on a normal 64 bit system
-    #But limit 100 can also take a lot of time to execute
+    #But limit 100 can also take a lot of time to execute, need to improve
     MAX = 100
     numbers = [int('1' * n) for n in range(2, MAX+1)]
 
-    # #Remove numbers divisible by 3 (divisibility rule) 
-    # for number in numbers:
-    #     if len(str(number)) % 3 == 0:
-    #         numbers.remove(number)
-      
     #Check divisibility by odd numbers, and keep removing elements from numbers list if it is not prime
     for divisor in range(3, int(int('1'*MAX) / 2) + 1, 2):
     
