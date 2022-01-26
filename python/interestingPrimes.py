@@ -8,6 +8,8 @@ from datetime import datetime
 import os
 import re
 
+import primeUtil
+
 default_prime_number_file = '\prime\data\primes.txt'
 
 '''
@@ -31,7 +33,8 @@ def primesWithAllNineDigits(   N,
                         withSequenceNumber,
                         delimiter):
     
-    return primesMatchingFunction (inputFileName, lambda x : all(y in x for y in list('123456789')))
+    #TODO need to find a faster alternative
+    return primesMatchingFunction (inputFileName, lambda prime : all(digit in prime for digit in list('123456789')))
 
 '''
 Find prime numbers which contain all 10 digits 0-9
@@ -42,7 +45,7 @@ def primesWithAllTenDigits(   N,
                         withSequenceNumber,
                         delimiter):
     
-    return primesMatchingFunction (inputFileName, all(lambda x : y in x for y in list('0123456789')))
+    return primesMatchingFunction (inputFileName, all(lambda prime : digit in prime for digit in list('0123456789')))
 
 '''
 Find prime numbers which have digits [1-9] in ascending sequence, e.g. 13, 23, but not 31
@@ -86,6 +89,52 @@ def primesWithSingleRepeatingDigit( N,
 
     return primesMatchingRegex( inputFileName, pattern)
 
+'''
+Find prime numbers with single repeating digit, e.g. 11
+
+Only the specific numbers are computed and tested for prime, instead of testing all primes.
+
+This function can be very slow, only partially tested.
+'''
+def primesWithSingleRepeatingDigit2( N,
+                                    Count,
+                                    withSequenceNumber,
+                                    delimiter):
+    primes = []
+
+    #Repeating even digits cannot create a prime, as they are divisible by 2
+    #Repeating digit 5 will always be divisible by 5
+    #Repeating digit 3 or 9 will always be divisible by 3
+    #Repeating digit 7 is always be divisible by 7
+    #So we only have digit 1 to test
+    
+    number = '1'
+    digit = '1'
+
+    #Random number, 300, approx upper limit based on testing on a normal 64 bit system
+    #But limit 50 can also take a lot of time to execute
+    for _ in range(1,50):
+        number += digit
+        isPrime = True
+        length = len(number)
+        
+        #Ignore numbers divisible by 3 (divisibility rule) 
+        if length % 3 == 0:
+            continue
+
+        int1 = int(number)
+
+        #Check divisibility by odd numbers
+        for divisor in range(3, int(int1 / 2) + 1, 2):
+            if int1 % divisor == 0:
+                isPrime = False
+                break
+        
+        if isPrime:
+            primes.append(number)
+            print('Prime: ' + str(number))
+
+    return primes
     
 '''
 Find prime numbers made up of only 2 digits, each occuring at least 1 time.
@@ -104,7 +153,8 @@ def primesWithOnlyTwoRepeatingDigit( N,
                             '^[56]{2,}$|^[57]{2,}$|^[58]{2,}$|^[59]{2,}$|' + \
                                 '^[67]{2,}$|^[68]{2,}$|^[69]{2,}$|' + \
                                     '^[78]{2,}$|^[79]{2,}$|' + \
-                                        '^[98]{2,}$'
+                                        '^[98]{2,}$|' + \
+                                            '^[01]{2,}$|^[07]{2,}$'
 
     return primesMatchingRegex( inputFileName, pattern)
 
@@ -134,10 +184,23 @@ def primesWithThreeConsecutiveRepeatingDigits( N,
                                     withSequenceNumber,
                                     delimiter):
     
-    pattern = r'^([1-9])\1*([1-9])\2*([1-9])\3*$'
+    pattern = r'^([1-9])\1*([0-9])\2*([1-9])\3*$'
 
     return primesMatchingRegex( inputFileName, pattern)
 
+'''
+Find prime numbers with alternate repeating digits.
+E.g.  with form nonononon (n and o alternately repeating).
+'''
+def primesWithAlternateRepeatingDigits( N,
+                                    Count,
+                                    inputFileName, 
+                                    withSequenceNumber,
+                                    delimiter):
+    
+    pattern = r'^([1-9])([0-9])(\1\2)*\1?$'
+
+    return primesMatchingRegex( inputFileName, pattern)
 
 '''
 Find prime numbers matching input regex
@@ -215,39 +278,35 @@ if __name__ == '__main__':
     
     #primes = palindromePrimes(  Num, Count, os.curdir + '\prime\data\million-primes.txt', withSequenceNumber, ', ')
 
-    primeWithAllNineDigit = primesWithAllNineDigits(  0, 0, os.curdir + default_prime_number_file, True, ', ')
-    print('Primes with all nine digits 1-9: ', primeWithAllNineDigit )
-    print('Number of prime numbers, with all nine digits, in input file: ', str(len(primeWithAllNineDigit)) )
-    
+    primesWithSingleDigit1 = primesWithSingleRepeatingDigit2(  0, 0, True, ', ')
+    primeUtil.printListToFile('primes-with-single-repeating-digits1.txt', primesWithSingleDigit1)
+
+    primesWithSingleDigit2 = primesWithSingleRepeatingDigit(  0, 0, os.curdir + default_prime_number_file, True, ', ')
+    primeUtil.printListToFile('primes-with-single-repeating-digits2.txt', primesWithSingleDigit2)
+
     palindromePrime = palindromePrimes(  0, 0, os.curdir + default_prime_number_file, True, ', ')
-    print('Palindrome primes: ', palindromePrime )
-    print('Number of palindrome prime numbers in input file: ', str(len(palindromePrime)) )
-    
+    primeUtil.printListToFile('primes-palindrome.txt', palindromePrime)
+
     primesWith3ConsecutiveRepeatingDigits = primesWithThreeConsecutiveRepeatingDigits(  0, 0, os.curdir + default_prime_number_file, True, ', ')
-    print('Primes with 3 consecutive repeating digit: ', primesWith3ConsecutiveRepeatingDigits )
-    print('Number of prime numbers in input file, with 3 consecutive repeating digit: ', str(len(primesWith3ConsecutiveRepeatingDigits)) )
+    primeUtil.printListToFile('primes-3-consecutive-repeating-digits.txt', primesWith3ConsecutiveRepeatingDigits)
 
     primesWithConsecutiveRepeatingDigits = primesWithConsecutiveRepeatingDigits(  0, 0, os.curdir + default_prime_number_file, True, ', ')
-    print('Primes with consecutive repeating digit: ', primesWithConsecutiveRepeatingDigits )
-    print('Number of prime numbers in input file, with consecutive repeating digit: ', str(len(primesWithConsecutiveRepeatingDigits)) )
+    primeUtil.printListToFile('primes-with-consecutive-repeating-digits.txt', primesWithConsecutiveRepeatingDigits)
 
     primesWithTwoRepeatingDigits = primesWithOnlyTwoRepeatingDigit(  0, 0, os.curdir + default_prime_number_file, True, ', ')
-    print('Primes with two repeating digit: ', primesWithTwoRepeatingDigits )
-    print('Number of prime numbers in input file, with two repeating digit: ', str(len(primesWithTwoRepeatingDigits)) )
-
-    primesWithSingleDigit = primesWithSingleRepeatingDigit(  0, 0, os.curdir + default_prime_number_file, True, ', ')
-    print('Primes with single repeating digit: ', primesWithSingleDigit )
-    print('Number of prime numbers in input file, with single repeating digit: ', str(len(primesWithSingleDigit)) )
+    primeUtil.printListToFile('primes-with-consecutive-2-repeating-digits.txt', primesWithTwoRepeatingDigits)
 
     primeWithDigitsInSequence = digitsInSequenecePrimes(  0, 0, os.curdir + default_prime_number_file, True, ', ')
-    print('Primes (digits in sequence): ', primeWithDigitsInSequence )
-    print('Number of prime numbers in input file, with digits in sequence: ', str(len(primeWithDigitsInSequence)) )
+    primeUtil.printListToFile('primes-digits-in-ascending-sequence.txt', primeWithDigitsInSequence)
 
     primeWithDigitsInRSequence = digitsInRSequenecePrimes(  0, 0, os.curdir + default_prime_number_file, True, ', ')
-    print('Primes (digits in reverse sequence): ', primeWithDigitsInRSequence )
-    print('Number of prime numbers in input file, with digits in reverse sequence: ', str(len(primeWithDigitsInRSequence)) )
+    primeUtil.printListToFile('primes-digits-in-descending-sequence.txt', primeWithDigitsInRSequence)
 
-    end = datetime.now()
-    print( 'Start and end time bool array: ', start.strftime("%H:%M:%S"), ' ', end.strftime("%H:%M:%S") )
-    print( 'Time taken (s): ', round( (end - start).total_seconds() , 2) )
-    print( 'Time taken (m): ', round( (end - start).total_seconds() / 60 , 2) )
+    primeWithAllNineDigit = primesWithAllNineDigits(  0, 0, os.curdir + default_prime_number_file, True, ', ')
+    primeUtil.printListToFile('primes-with-all-nine-digits.txt', primeWithAllNineDigit)
+
+    primesWithAlternateRepeatingDigit = primesWithAlternateRepeatingDigits(  0, 0, os.curdir + default_prime_number_file, True, ', ')
+    primeUtil.printListToFile('primes-with-alternate-repeating-digits.txt', primesWithAlternateRepeatingDigit)
+
+    primeUtil.printExecutionTime(start, datetime.now())
+    
